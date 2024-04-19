@@ -4,7 +4,26 @@ import { json, redirect } from "@remix-run/node";
 import { getPostgresDatabaseManager } from '~/common--database-manager--postgres/postgresDatabaseManager.server';
 import { useState } from 'react';
 import FuzzySearchComponent from "./FuzzySearchComponent";
+import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
+import {User} from "~/utilities/typeDefinitions";
 import { Link } from 'react-router-dom';
+
+type LoaderData = {
+  user: User & {
+      taskNo?: string;
+      Id?: string;
+      token?:string;
+      employeeId?: string;
+      imageUrl?: string;
+      firstName?: string;
+      lastName?: string;
+      designation?: string;
+      department?: string;
+      reportingManager?: string;
+      slackId?: string;
+      phoneNumber?: string;
+  };
+};
 
 type Category = {
   id: number;
@@ -18,6 +37,25 @@ type Product = {
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
+
+    const accessToken = await getAccessTokenFromCookies(request);
+
+        if (accessToken == null) {
+            return redirect("/sign-in");
+        }else{
+          console.log("accessToken hai")
+        }
+
+        if (!accessToken.email.endsWith("@growthjockey.com")) {
+            throw new Error("Unauthorized access");
+        }
+
+        const user: User & {employeeId?: string} = {
+            id: accessToken.userId,
+            email: accessToken.email,
+            profilePicture: accessToken.profilePicture,
+        };
+
     const postgresDatabaseManager = await getPostgresDatabaseManager(null);
     if (postgresDatabaseManager instanceof Error) {
       throw new Error("Error connecting to database");
@@ -42,7 +80,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     console.log(names);
     console.log(products)
 
-    return json({ names,categories});
+    return json({ names,categories,user});
   } catch (error) {
     console.error(error);
     return json({ error: "Failed to load categories" }, 500);
@@ -73,7 +111,10 @@ export default function Index() {
           />
 
         </div>
-      
+        <div className="h-32 w-32 bg-white">
+          <h1>{data.user.id}</h1>
+          <img src={data.user.profilePicture} alt="" />
+        </div>
         <FuzzySearchComponent data={data.names}/>
         <main className="container mx-auto py-8">
 

@@ -14,7 +14,7 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({request}) => {
     const accessToken = await getAccessTokenFromCookies(request);
-
+   console.log("shivi")
     if (accessToken != null) {
         return redirect("/");
     }
@@ -52,8 +52,8 @@ export default function () {
     }, []);
 
     return (
-        <div className="tw-px-4 tw-w-full tw-max-w-lg tw-mx-auto">
-            shivam
+        <div className="px-4 w-full max-w-lg mx-auto">
+           
             <SignInWithGoogle authCallbackUrl={authCallbackUrl} />
         </div>
     );
@@ -62,11 +62,11 @@ export default function () {
 function SignInWithGoogle({className, authCallbackUrl}: {className?: string; authCallbackUrl: string}) {
     return (
         <div className={className}>
-            <div className="tw-h-[31.25rem]">
+            <div className="h-[31.25rem]">
                 <iframe
                     title="accounts"
                     src={authCallbackUrl}
-                    className={"tw-h-full tw-w-full tw-rounded-xl"}
+                    className={"h-full w-full rounded-xl"}
                 ></iframe>
             </div>
         </div>
