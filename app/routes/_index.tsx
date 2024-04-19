@@ -1,17 +1,11 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from '@remix-run/react';
 import { json, redirect } from "@remix-run/node";
-import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
 import { getPostgresDatabaseManager } from '~/common--database-manager--postgres/postgresDatabaseManager.server';
 import { useState } from 'react';
-import { Combobox, InputBase } from '@mantine/core';
-import SelectGroupsSearchable from "./SelectGroupSearchable";
 import FuzzySearchComponent from "./FuzzySearchComponent";
-
-
-
 import { Link } from 'react-router-dom';
-import SearchableSelect from "./SearchableSelect";
+
 type Category = {
   id: number;
   title: string;
@@ -24,7 +18,6 @@ type Product = {
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
-    // Fetch categories from the database
     const postgresDatabaseManager = await getPostgresDatabaseManager(null);
     if (postgresDatabaseManager instanceof Error) {
       throw new Error("Error connecting to database");
@@ -64,11 +57,13 @@ export default function Index() {
 
       <div className="bg-gradient-to-br from-orange-200 to-orange-300 min-h-screen">
         <header className="flex justify-center bg-orange-50 text-white py-4">
+        <Link to={`/`} >
           <img
             src="https://sleepyhug.in/cdn/shop/files/Group_1831.png?v=1690469218&width=140"
             className=""
             alt="Logo"
           />
+          </Link>
         </header>
         <div className="w-full">
           <img

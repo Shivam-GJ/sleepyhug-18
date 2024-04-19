@@ -1,9 +1,6 @@
 import { getPostgresDatabaseManager } from "~/common--database-manager--postgres/postgresDatabaseManager.server";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { getObjectFromUnknown } from "~/global-common-typescript/utilities/typeValidationUtilities";
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 export let loader: LoaderFunction = async ({ request, params }) => {
     const postgresDatabaseManager = await getPostgresDatabaseManager(null);
     if (postgresDatabaseManager instanceof Error) {

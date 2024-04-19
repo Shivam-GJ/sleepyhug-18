@@ -32,7 +32,7 @@ function FuzzySearchComponent({ data }) {
   };
 
   return (
-    <div className='absolute top-2 right-2  '>
+    <div className='absolute top-2 right-2 '>
       <input
         type="text"
         placeholder={selectedItem ? selectedItem.name : "Search..."}
@@ -40,7 +40,7 @@ function FuzzySearchComponent({ data }) {
         onChange={handleSearchChange}
         className='w-80 rounded-md h-8 p-2'
       />
-      <Link to={`/product/${encodeURIComponent(selectedItem?.name)}`}>
+      <Link to={`/search/product/${encodeURIComponent(selectedItem?.name)}`}>
         <button><img src="https://uxwing.com/wp-content/themes/uxwing/download/user-interface/search-icon.png" alt="" className='h-4 mx-2' /></button>
       </Link>
       {showList && (

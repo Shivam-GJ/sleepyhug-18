@@ -49,11 +49,13 @@ export default function Index() {
     return (
         <div className="bg-gradient-to-br from-orange-200 to-orange-300 min-h-screen">
           <header className="flex justify-center bg-orange-50 text-white py-4">
-            <img
-              src="https://sleepyhug.in/cdn/shop/files/Group_1831.png?v=1690469218&width=140"
-              className=""
-              alt="Logo"
-            />
+          <Link to={`/`} >
+          <img
+            src="https://sleepyhug.in/cdn/shop/files/Group_1831.png?v=1690469218&width=140"
+            className=""
+            alt="Logo"
+          />
+          </Link>
           </header>
       
           <main className="container mx-auto py-4">
