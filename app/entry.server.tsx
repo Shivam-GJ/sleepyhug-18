@@ -11,8 +11,12 @@ import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import type {PostgresDatabaseCredentials} from "~/common--database-manager--postgres/postgresDatabaseManager.server";
 
 const ABORT_DELAY = 5_000;
+
+global._postgresDatabaseCredentialsResolver =
+    postgresDatabaseCredentialsResolver;
 
 export default function handleRequest(
   request: Request,
@@ -137,4 +141,21 @@ function handleBrowserRequest(
 
     setTimeout(abort, ABORT_DELAY);
   });
+}
+
+function postgresDatabaseCredentialsResolver(
+  id: Uuid | null,
+): PostgresDatabaseCredentials | Error {
+  if (id == null) {
+      const result: PostgresDatabaseCredentials = {
+          DB_HOST: process.env.DB_HOST,
+          DB_PORT: process.env.DB_PORT,
+          DB_NAME: process.env.DB_NAME,
+          DB_USERNAME: process.env.DB_USERNAME,
+          DB_PASSWORD: process.env.DB_PASSWORD,
+      };
+      return result;
+  } else {
+      return Error("5f79b6ae-6b47-4b17-8c3b-eab10fa46a21");
+  }
 }

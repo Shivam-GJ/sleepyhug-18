@@ -1,0 +1,15 @@
+[submodule "app/common--database-manager--postgres"]
+	path = app/common--database-manager--postgres
+	url = https://github.com/GrowthJockey/common--database-manager--postgres.git
+[submodule "app/common--type-definitions"]
+	path = app/common--type-definitions
+	url = https://github.com/GrowthJockey/common--type-definitions.git
+[submodule "app/common-remix--utilities"]
+	path = app/common-remix--utilities
+	url = https://github.com/GrowthJockey/common-remix--utilities.git
+[submodule "app/global-common-typescript"]
+	path = app/global-common-typescript
+	url = https://github.com/GrowthJockey/global-common-typescript.git
+[submodule "app/growth-jockey-common-typescript"]
+	path = app/growth-jockey-common-typescript
+	url = https://github.com/GrowthJockey/growth-jockey-common-typescript.git
