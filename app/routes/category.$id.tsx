@@ -81,7 +81,7 @@ export default function Index() {
                         alt="Logo"
                     />
                 </Link>
-                <Cart  noOfCartItems={data.noOfCartItems} userEmail={data.userEmail}/>
+                {/* <Cart  noOfCartItems={data.noOfCartItems} userEmail={data.userEmail}/> */}
             </header>
             <div className="w-full">
                 <img

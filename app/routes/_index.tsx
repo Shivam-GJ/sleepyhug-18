@@ -77,8 +77,8 @@ export const loader: LoaderFunction = async ({ request }) => {
         const products: Product[] = resultProducts.rows;
         const categories: Category[] = result.rows;
         const names = products.map((item) => item.name);
-        console.log(names);
-        console.log(products);
+        // console.log(names);
+        // console.log(products);
 
         return json({ names, categories, user,row });
     } catch (error) {
@@ -150,7 +150,7 @@ export default function Index() {
                                 <Link
                                     to="/sign-out"
                                     className="tw-p-3 hover:tw-underline "
-                                >
+                                   >
                                     Logout
                                 </Link>
                             </button>

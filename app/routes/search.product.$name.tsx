@@ -14,8 +14,15 @@ type Product = {
 
 export const loader: LoaderFunction = async ({ request,params}) => {
     try {
+      const accessToken = await getAccessTokenFromCookies(request);
+      if (accessToken == null) {
+        return redirect("/sign-in");
+    } else {
+        console.log("accessToken hai");
+        console.log(accessToken.email)
+    }
         const productName=params.name;
-      // Fetch categories from the database
+      
       const postgresDatabaseManager = await getPostgresDatabaseManager(null);
       if (postgresDatabaseManager instanceof Error) {
         throw new Error("Error connecting to database");
@@ -23,7 +30,7 @@ export const loader: LoaderFunction = async ({ request,params}) => {
       
       const result = await postgresDatabaseManager.execute(
         `SELECT 
-             name,price,image_url,description
+             name,price,image_url,description,id
         FROM
              products
         WHERE
@@ -36,8 +43,9 @@ export const loader: LoaderFunction = async ({ request,params}) => {
       }
   
       const products: Product[] = result.rows;
+      const userEmail=accessToken.email;
   
-      return json({ products});
+      return json({ products,userEmail});
     } catch (error) {
       console.error(error);
       return json({ error: "Failed to load categories" }, 500);
@@ -46,10 +54,31 @@ export const loader: LoaderFunction = async ({ request,params}) => {
 
 export default function Index() {
     const data = useLoaderData();
+    console.log(data.userEmail);
+
+
+    const handleAddToCart = async (email, productId) => {
+    
+      console.log(email)
+      console.log(productId)
+      try {
+         
+              await fetch("/addProduct", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ email, product_id: productId }),
+              });
+          
+      } catch (error) {
+          console.error("Failed to increase product:", error);
+      }
+  };
   
     return (
         <div className="bg-gradient-to-br from-orange-200 to-orange-300 min-h-screen">
-          <Cart/>
+          {/* <Cart/> */}
           <header className="flex justify-center bg-orange-50 text-white py-4">
           <Link to={`/`} >
           <img
@@ -86,7 +115,7 @@ export default function Index() {
                   <h2 className="text-xl font-semibold">{data.products[0].price}</h2>
                 </div>
                 <div>
-                  <button className="border  p-1 px-2 rounded text-black">Add to cart</button>
+                  <button onClick={()=>handleAddToCart(data.userEmail,data.products[0].id)}  className="border  p-1 px-2 rounded text-black">Add to cart</button>
                 </div>
               </div>
             </div>
