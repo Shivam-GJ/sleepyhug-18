@@ -17,7 +17,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 
 export const meta: MetaFunction = () => {
-    const title = "GrowthJockey Admin Panel";
+    const title = "Sleepyhug";
 
     return [{title: title}, {property: "og:title", content: title}];
 };

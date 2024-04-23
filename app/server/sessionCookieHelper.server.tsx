@@ -2,7 +2,7 @@ import {NonEmptyString, Uuid} from "~/common--type-definitions/typeDefinitions";
 import {getRequiredEnvironmentVariable} from "~/common-remix--utilities/utilities.server";
 import {getSessionCookie} from "~/server/sessionCookie.server";
 import {getTtlCache} from "~/growth-jockey-common-typescript/server/cache.server";
-import {getEmailFromSession, getProfilePictureFromSession, getUserIdFromSession, verifyAccessToken} from "~/server/accounts.server";
+import {getEmailFromSession, getNameFromSession, getProfilePictureFromSession, getUserIdFromSession, verifyAccessToken} from "~/server/accounts.server";
 
 // export const zodAccessToken = zod.object();
 export type AccessToken = {
@@ -10,6 +10,7 @@ export type AccessToken = {
     userId: Uuid;
     email: string;
     profilePicture: string;
+    name:string;
     // TODO: Figure out what the future of schemaVersion will be
     // schemaVersion: NonEmptyString;
 };
@@ -58,12 +59,17 @@ export async function getAccessTokenFromCookies(request: Request): Promise<Acces
     if (profilePicture instanceof Error || profilePicture == null) {
         return null;
     }
+    const name = await getNameFromSession(session.get("accessToken"));
+    if (name instanceof Error || name == null) {
+        return null;
+    }
 
     const accessToken: AccessToken = {
         token: session.get("accessToken"),
         userId: userId as Uuid,
         email: email,
         profilePicture: profilePicture,
+        name:name,
         // schemaVersion: getRequiredEnvironmentVariable("COOKIE_SCHEMA_VERSION"),
     };
 

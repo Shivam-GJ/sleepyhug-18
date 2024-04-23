@@ -9,4 +9,5 @@ export type User = {
     id: Uuid;
     email: string;
     profilePicture: string;
+    noOfCartItems:number;
 }

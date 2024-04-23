@@ -32,7 +32,7 @@ function FuzzySearchComponent({ data }) {
   };
 
   return (
-    <div className='absolute top-2 right-2 '>
+    <div className='absolute top-2 right-20 '>
       <input
         type="text"
         placeholder={selectedItem ? selectedItem.name : "Search..."}

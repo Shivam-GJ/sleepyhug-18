@@ -4,6 +4,7 @@ import { json, redirect } from "@remix-run/node";
 import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
 import { getPostgresDatabaseManager } from '~/common--database-manager--postgres/postgresDatabaseManager.server';
 import { Link } from 'react-router-dom';
+import Cart from "~/Components/cart";
 
 type Product = {
   name: number;
@@ -48,6 +49,7 @@ export default function Index() {
   
     return (
         <div className="bg-gradient-to-br from-orange-200 to-orange-300 min-h-screen">
+          <Cart/>
           <header className="flex justify-center bg-orange-50 text-white py-4">
           <Link to={`/`} >
           <img
@@ -58,7 +60,7 @@ export default function Index() {
           </Link>
           </header>
       
-          <main className="container mx-auto py-4">
+          <main className="container mx-auto py-4 px-2">
             <div className="bg-white rounded-lg shadow-md p-4 flex items-center">
              
               <div>
@@ -82,6 +84,9 @@ export default function Index() {
                   </p>
                 <div>
                   <h2 className="text-xl font-semibold">{data.products[0].price}</h2>
+                </div>
+                <div>
+                  <button className="border  p-1 px-2 rounded text-black">Add to cart</button>
                 </div>
               </div>
             </div>
