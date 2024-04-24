@@ -1,7 +1,19 @@
 import { useState } from "react";
 import { Link } from "@remix-run/react";
+import { useEffect } from "react";
+export default function Cart({}) {
+    const [productRow, setproductRow] = useState([]);
 
-export default function Cart({ productRow }) {
+    useEffect(() => {
+        fetch(`/getCart/`)
+            .then((response) => response.json())
+            .then((data) => {
+                setproductRow(data.result);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    }, []);
     const [openCart, setOpenCart] = useState(false);
     const totalNoOfProducts = productRow.reduce(
         (total, item) => total + item.no_of_product,

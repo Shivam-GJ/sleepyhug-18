@@ -47,21 +47,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             throw new Error("Error querying database for categories");
         }
 
-        const cartItems = await postgresDatabaseManager.execute(
-            `SELECT no_of_items FROM cart
-            WHERE
-              email = $1`,
-            [accessToken.email]
-        );
-        if (cartItems instanceof Error) {
-            throw new Error("Error querying database for products");
-        }
-        const noOfCartItems=cartItems.rows[0].no_of_items;
+       
         const userEmail=accessToken.email;
 
         const products: Product[] = result.rows;
 
-        return json({ products,noOfCartItems,userEmail });
+        return json({ products,userEmail });
     } catch (error) {
         console.error(error);
         return json({ error: "Failed to load categories" }, 500);
@@ -81,7 +72,7 @@ export default function Index() {
                         alt="Logo"
                     />
                 </Link>
-                {/* <Cart  noOfCartItems={data.noOfCartItems} userEmail={data.userEmail}/> */}
+                <Cart/>
             </header>
             <div className="w-full">
                 <img
@@ -91,7 +82,9 @@ export default function Index() {
                 ></img>
             </div>
             <main className="container mx-auto py-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 m-4 md:grid-cols-4 gap-6">
+
+                
                     {data.products.map((product) => (
                         <Link to={`/product/${product.id}`} key={product.id}>
                             <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer transition duration-300 transform hover:scale-105">

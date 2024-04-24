@@ -53,19 +53,6 @@ export const loader: LoaderFunction = async ({ request }) => {
             throw new Error("Error querying database for products");
         }
 
-        const cartItems = await postgresDatabaseManager.execute(
-            `SELECT DISTINCT c.product_id, c.no_of_product, p.name, p.price, p.image_url
-            FROM cart c
-            JOIN products p ON c.product_id = p.id
-            WHERE c.email  = $1`,
-            [accessToken.email]
-        );
-        if (cartItems instanceof Error) {
-            throw new Error("Error querying database for products");
-        }
-        console.log(cartItems.rows)
-        const row=cartItems.rows;
-
         const user: User & { employeeId?: string } = {
             id: accessToken.userId,
             email: accessToken.email,
@@ -73,14 +60,13 @@ export const loader: LoaderFunction = async ({ request }) => {
             name: accessToken.name,
         };
     
-
         const products: Product[] = resultProducts.rows;
         const categories: Category[] = result.rows;
         const names = products.map((item) => item.name);
         // console.log(names);
         // console.log(products);
 
-        return json({ names, categories, user,row });
+        return json({ names, categories, user});
     } catch (error) {
         console.error(error);
         return json({ error: "Failed to load categories" }, 500);
@@ -102,7 +88,7 @@ export default function Index() {
                         />
                     </Link>
                     <Cart
-                        productRow={data.row}
+                       
                     />
                 </header>
                 <div className="w-full">

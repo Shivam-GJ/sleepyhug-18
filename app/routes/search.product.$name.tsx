@@ -87,6 +87,7 @@ export default function Index() {
             alt="Logo"
           />
           </Link>
+          <Cart/>
           </header>
       
           <main className="container mx-auto py-4 px-2">
