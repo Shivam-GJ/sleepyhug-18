@@ -60,7 +60,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export default function SearchProductsById() {
 	const data = useLoaderData();
     console.log(data.userEmail);
-    const handleAddToCart = async (email, productId) => {
+    const handleAddToCart = async (email:string, productId:number) => {
         console.log(email);
         console.log(productId);
         try {
@@ -71,6 +71,8 @@ export default function SearchProductsById() {
                 },
                 body: JSON.stringify({ email, product_id: productId }),
             });
+
+			window.location.reload();
         } catch (error) {
             console.error("Failed to increase product:", error);
         }

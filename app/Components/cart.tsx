@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "@remix-run/react";
 import { useEffect } from "react";
+import { useContext } from "react";
+
 export default function Cart({}) {
     const [productRow, setproductRow] = useState([]);
-
+   
     useEffect(() => {
         fetch(`/getCart/`)
             .then((response) => response.json())
@@ -54,6 +56,9 @@ export default function Cart({}) {
                     body: JSON.stringify({ email, product_id: productId }),
                 });
             }
+            const response = await fetch(`/getCart/`);
+            const data = await response.json();
+            setproductRow(data.result);
         } catch (error) {
             console.error("Failed to increase product:", error);
         }
@@ -62,7 +67,7 @@ export default function Cart({}) {
     return (
         <>
             <div
-                className="absolute top-4 right-6 "
+                className="absolute top-4 right-6 cursor-pointer"
                 onClick={() => setOpenCart(!openCart)}
             >
                 <img

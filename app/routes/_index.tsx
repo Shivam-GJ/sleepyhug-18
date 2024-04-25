@@ -8,6 +8,7 @@ import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
 import { User } from "~/utilities/typeDefinitions";
 import { Link } from "react-router-dom";
 import Cart from "~/Components/cart";
+import { createContext } from "react";
 
 type Category = {
     id: number;
@@ -59,14 +60,14 @@ export const loader: LoaderFunction = async ({ request }) => {
             profilePicture: accessToken.profilePicture,
             name: accessToken.name,
         };
-    
+
         const products: Product[] = resultProducts.rows;
         const categories: Category[] = result.rows;
         const names = products.map((item) => item.name);
         // console.log(names);
         // console.log(products);
 
-        return json({ names, categories, user});
+        return json({ names, categories, user });
     } catch (error) {
         console.error(error);
         return json({ error: "Failed to load categories" }, 500);
@@ -74,6 +75,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Index() {
+    const MyContext = createContext("shivam");
     const data = useLoaderData();
     const [profileOpen, setProfileOpen] = useState(false);
     return (
@@ -87,9 +89,9 @@ export default function Index() {
                             alt="Logo"
                         />
                     </Link>
-                    <Cart
-                       
-                    />
+                   
+
+                    <Cart />
                 </header>
                 <div className="w-full">
                     <img
@@ -136,7 +138,7 @@ export default function Index() {
                                 <Link
                                     to="/sign-out"
                                     className="tw-p-3 hover:tw-underline "
-                                   >
+                                >
                                     Logout
                                 </Link>
                             </button>
