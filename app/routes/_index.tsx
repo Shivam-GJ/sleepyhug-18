@@ -75,7 +75,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Index() {
-    const MyContext = createContext("shivam");
+   
     const data = useLoaderData();
     const [profileOpen, setProfileOpen] = useState(false);
     return (
