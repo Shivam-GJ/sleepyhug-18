@@ -16,6 +16,8 @@ type Category = {
     imageUrl: string;
 };
 
+
+
 type Product = {
     name: string;
 };
@@ -27,13 +29,13 @@ export const loader: LoaderFunction = async ({ request }) => {
         if (accessToken == null) {
             return redirect("/sign-in");
         } else {
-            console.log("accessToken hai");
+            console.log("valid access token for index page");
         }
 
         if (!accessToken.email.endsWith("@growthjockey.com")) {
             throw new Error("Unauthorized access");
         }
-        console.log(accessToken);
+        // console.log(accessToken);
 
         const postgresDatabaseManager = await getPostgresDatabaseManager(null);
         if (postgresDatabaseManager instanceof Error) {
@@ -99,7 +101,9 @@ export default function Index() {
                         className="w-full"
                         alt="Banner"
                     />
+                    
                 </div>
+                
                 <div className="h-auto w-auto p-2 text-black bg-white absolute top-2 left-2 border flex flex-col gap-1 ">
                     <div className="flex gap-4 ">
                         {" "}

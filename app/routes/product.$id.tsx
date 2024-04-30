@@ -7,6 +7,9 @@ import { Link } from "react-router-dom";
 import Cart from "~/Components/cart";
 import cart from "../assets/cart.png";
 import { useState } from "react";
+import { useCart } from "~/Context/CartContext";
+import { Bounce, ToastContainer,toast } from "react-toastify";
+import 'react-toastify/ReactToastify.css'
 
 type Product = {
     name: number;
@@ -21,7 +24,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         if (accessToken == null) {
             return redirect("/sign-in");
         } else {
-            console.log("accessToken hai");
+            console.log("accessToken hai for product by id page");
         }
 
         if (!accessToken.email.endsWith("@growthjockey.com")) {
@@ -36,7 +39,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
         const result = await postgresDatabaseManager.execute(
             `SELECT 
-             name,price,image_url,image_url2,image_url3,image_url4,description,id
+             name,price,original_price,image_url,image_url2,image_url3,image_url4,description,id
         FROM
              products
         WHERE
@@ -51,6 +54,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         const userEmail = accessToken.email;
 
         const products: Product[] = result.rows;
+        console.log("this is the product"+ JSON.stringify(products))
 
         return json({ products, userEmail });
     } catch (error) {
@@ -60,12 +64,24 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function SearchProductsById() {
+    const { dispatch } = useCart(); 
     const data = useLoaderData();
     console.log(data.userEmail);
 	
     const [previewImage,setPreviewImage]=useState(data.products[0].image_url);
+    const notify=()=>toast.success('😍 Product added to your cart!', {
+        position: "top-left",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        });
 
-    const handleAddToCart = async (email: string, productId: number) => {
+    const handleAddToCart = async (email: string, productId: string) => {
         console.log(email);
         console.log(productId);
         try {
@@ -77,11 +93,25 @@ export default function SearchProductsById() {
                 body: JSON.stringify({ email, product_id: productId }),
             });
 
-            window.location.reload();
+            dispatch({ 
+                type: "ADD_PRODUCT", 
+                product: { 
+                    product_id: data.products[0].id,
+                    name: data.products[0].name,
+                    image_url: data.products[0].image_url,
+                    price: data.products[0].price,
+                    no_of_product: 1 
+                } 
+            });
+             // Dispatching an action to add the product to the cart with initial quantity 1
+             notify();
+            // window.location.reload();
         } catch (error) {
             console.error("Failed to increase product:", error);
         }
     };
+
+  
 
     return (
         <div className="bg-white min-h-screen">
@@ -153,10 +183,12 @@ export default function SearchProductsById() {
                                     ₹ {data.products[0].price}
                                 </h2>
                                 <h2 className="text-xl font-semibold line-through">
-                                    ₹ {data.products[0].price}
+                                    ₹ {data.products[0].original_price}
                                 </h2>
                             </div>
-                            <div className="py-2"><div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold"> {data.products[0].price - data.products[0].price}% off</div></div>
+                            <div className="py-2"><div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold"> 
+							{Math.floor(100*((data.products[0].original_price - data.products[0].price)/data.products[0].original_price))}
+							% off</div></div>
                         </div>
                         <div>
                             <button
@@ -171,6 +203,7 @@ export default function SearchProductsById() {
 								<img src={cart} alt="" className="h-6 w-6" />
                                  Add to cart
                             </button>
+                            <ToastContainer/>
                         </div>
                     </div>
                 </div>

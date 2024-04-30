@@ -38,7 +38,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
         const result = await postgresDatabaseManager.execute(
             `SELECT 
-             name,price,image_url,image_url2,image_url3,image_url4,description,id
+             name,price,original_price,image_url,image_url2,image_url3,image_url4,description,id
         FROM
              products
         WHERE
@@ -151,11 +151,13 @@ export default function SearchProductByName() {
                                 ₹ {data.products[0].price}
                             </h2>
                             <h2 className="text-xl font-semibold line-through">
-                                ₹ {data.products[0].price}
+                                ₹ {data.products[0].original_price}
                             </h2>
                         </div>
-                        <div className="py-2"><div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold"> {data.products[0].price - data.products[0].price}% off</div></div>
-                    </div>
+                        <div className="py-2"><div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold"> 
+							{Math.floor(100*((data.products[0].original_price - data.products[0].price)/data.products[0].original_price))}
+							% off</div></div>
+                        </div>
                     <div>
                         <button
                             onClick={() =>

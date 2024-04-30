@@ -1,66 +1,38 @@
-import { useState } from "react";
 import { Link } from "@remix-run/react";
-import { useEffect } from "react";
-import { useContext } from "react";
+import { useCart } from "../Context/CartContext";
+import { useState } from "react";
 
-export default function Cart({}) {
-    const [productRow, setproductRow] = useState([]);
-   
-    useEffect(() => {
-        fetch(`/getCart/`)
-            .then((response) => response.json())
-            .then((data) => {
-                setproductRow(data.result);
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-            });
-    }, []);
-    const [openCart, setOpenCart] = useState(false);
-    const totalNoOfProducts = productRow.reduce(
+export default function Cart() {
+    const { state, dispatch } = useCart(); 
+    // console.log("state"+JSON.stringify(state));
+
+    const totalNoOfProducts = state.productRow.reduce(
         (total, item) => total + item.no_of_product,
         0
     );
 
-    const subtotalPrice = productRow.reduce(
+    const subtotalPrice = state.productRow.reduce(
         (subtotal, item) => subtotal + item.price * item.no_of_product,
         0
     );
+    const [openCart, setOpenCart] = useState(false);
 
-    const handleClick = async (email, productId, action) => {
+    const handleClick = async (email:string, productId:string, action:string) => {
         try {
-            if (action == "increase") {
-                await fetch("/increaseProductByOne", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email, product_id: productId }),
-                });
+            if (action === "increase") {
+              
+                dispatch({ type: "INCREASE_PRODUCT", productId });
             }
-            if (action == "decrease") {
-                await fetch("/decreaseProductByOne", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email, product_id: productId }),
-                });
+            if (action === "decrease") {
+              
+                dispatch({ type: "DECREASE_PRODUCT", productId });
             }
-            if (action == "delete") {
-                await fetch("/deleteProduct", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email, product_id: productId }),
-                });
+            if (action === "delete") {
+               
+                dispatch({ type: "DELETE_PRODUCT", productId });
             }
-            const response = await fetch(`/getCart/`);
-            const data = await response.json();
-            setproductRow(data.result);
         } catch (error) {
-            console.error("Failed to increase product:", error);
+            console.error("Failed to update product:", error);
         }
     };
 
@@ -105,7 +77,7 @@ export default function Cart({}) {
                         </div>
                         <div>
                             <ul>
-                                {productRow.map((item, index) => (
+                                {state.productRow.map((item, index) => (
                                     <li key={index}>
                                         <div className="bg-green-200 m-2 p-2 rounded flex gap-4 justify-between">
                                             <div className=" flex gap-4">
@@ -140,13 +112,6 @@ export default function Cart({}) {
                                                         </div>
                                                         <div
                                                             className="border border-black h-6 w-6 border-l-0 flex justify-center items-center cursor-pointer"
-                                                            // onClick={() => {
-                                                            //     IncreaseProductByOne({
-                                                            //         email: "shivam.gautam@growthjockey.com",
-                                                            //         product_id: item.product_id
-                                                            //     });
-
-                                                            // }}
                                                             onClick={() =>
                                                                 handleClick(
                                                                     "shivam.gautam@growthjockey.com",

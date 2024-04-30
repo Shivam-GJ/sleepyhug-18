@@ -1,13 +1,9 @@
 import { getPostgresDatabaseManager } from "~/common--database-manager--postgres/postgresDatabaseManager.server";
 import { json, redirect } from "@remix-run/node";
 
-export async function AddProduct({
-    email,
-    product_id,
-}: {
-    email: string;
-    product_id: number;
-}) {
+export async function AddProduct(
+    email:string,
+    product_id:string) {
     try {
         const postgresDatabaseManager = await getPostgresDatabaseManager(null);
         if (postgresDatabaseManager instanceof Error) {

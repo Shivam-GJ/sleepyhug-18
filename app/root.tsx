@@ -15,6 +15,7 @@ import "~/tailwind.css";
 // Ensure this is always below tailwind styles
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import CartContent from "./Components/cart";
 
 export const meta: MetaFunction = () => {
     const title = "Sleepyhug";
@@ -58,6 +59,7 @@ export default function App() {
             </head>
 
             <body className="tw-bg-ap-background tw-text-ap-foreground tw-text-base tw-dark tw-h-screen" >
+            
                 <MantineProvider defaultColorScheme="dark">
                     <Notifications
                         position="top-right"
@@ -70,6 +72,7 @@ export default function App() {
                     <ScrollRestoration />
                     <Scripts />
                 </MantineProvider>
+                
             </body>
         </html>
     );
