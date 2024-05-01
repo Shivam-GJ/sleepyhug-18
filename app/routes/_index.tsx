@@ -9,6 +9,7 @@ import { User } from "~/utilities/typeDefinitions";
 import { Link } from "react-router-dom";
 import Cart from "~/Components/cart";
 import { createContext } from "react";
+import WishList from "~/Components/wishList";
 
 type Category = {
     id: number;
@@ -92,7 +93,7 @@ export default function Index() {
                         />
                     </Link>
                    
-
+                    <WishList/>
                     <Cart />
                 </header>
                 <div className="w-full">

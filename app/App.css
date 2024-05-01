@@ -1,0 +1,35 @@
+.heart-icon{
+    margin: 0px;
+    height:100px;
+    width:100px;
+    background: url("assets/heart.png");
+    background-position:left;
+    cursor: pointer;
+    position: absolute;
+
+}
+
+.heart-bg{
+background-color: white;
+margin: 0px;
+border-radius: 50%;
+height:60px;
+width: 60px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.heart-bg:hover{
+    background:rgba(255,192,200,0.7)
+}
+
+.heart-icon.liked{
+    animation: heart-burst 1s steps(28) forwards ;
+}
+
+@keyframes heart-burst{
+    to{
+        background-position:right;
+    }
+}

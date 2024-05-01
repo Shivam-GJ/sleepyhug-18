@@ -1,7 +1,7 @@
 import { LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
-import { Cart } from "~/Backend/cart.server";
+import { WishList } from "~/Backend/wishlist.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
     try {
@@ -16,11 +16,10 @@ export const loader: LoaderFunction = async ({ request }) => {
         if (!accessToken.email.endsWith("@growthjockey.com")) {
             throw new Error("Unauthorized access");
         }
-        const result =await Cart(accessToken.email);
+        const result =await WishList(accessToken.email);
         return json({result});
     } catch (error) {
         console.error(error);
         return json(error);
     }
 };
-

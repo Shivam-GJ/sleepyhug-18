@@ -1,15 +1,21 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+
+import { useEffect } from "react";
 import { json, redirect } from "@remix-run/node";
 import { getAccessTokenFromCookies } from "~/server/sessionCookieHelper.server";
 import { getPostgresDatabaseManager } from "~/common--database-manager--postgres/postgresDatabaseManager.server";
 import { Link } from "react-router-dom";
 import Cart from "~/Components/cart";
+import WishList from "~/Components/wishList";
 import cart from "../assets/cart.png";
+import heart from "../assets/heart.png";
 import { useState } from "react";
-import { useCart } from "~/Context/CartContext";
-import { Bounce, ToastContainer,toast } from "react-toastify";
-import 'react-toastify/ReactToastify.css'
+import { useCart } from "~/Context/cartContext";
+import { useWishList } from "~/Context/wishListContext";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/ReactToastify.css";
+import "../App.css";
 
 type Product = {
     name: number;
@@ -50,11 +56,25 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         if (result instanceof Error) {
             throw new Error("Error querying database for products");
         }
-
+// ----------------------------------------------------------------------
+        const resultVariants = await postgresDatabaseManager.execute(
+            `SELECT 
+             name,price,original_price,image_url,image_url2,image_url3,image_url4,description,id
+        FROM
+             products
+        WHERE
+              id = $1`,
+            [productId]
+        );
+        
+        if (resultVariants instanceof Error) {
+            throw new Error("Error querying database for products");
+        }
+// ----------------------------------------------------------------
         const userEmail = accessToken.email;
 
         const products: Product[] = result.rows;
-        console.log("this is the product"+ JSON.stringify(products))
+        console.log("this is the product" + JSON.stringify(products));
 
         return json({ products, userEmail });
     } catch (error) {
@@ -64,22 +84,61 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function SearchProductsById() {
-    const { dispatch } = useCart(); 
+    const { dispatch } = useCart();
+    const { dispatch2 } = useWishList();
     const data = useLoaderData();
-    console.log(data.userEmail);
-	
-    const [previewImage,setPreviewImage]=useState(data.products[0].image_url);
-    const notify=()=>toast.success('😍 Product added to your cart!', {
-        position: "top-left",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
+    const { state: wishlistState } = useWishList();
+    const [liked, setLiked] = useState(false);
+
+ useEffect(() => {
+    const productIdToCheck = data.products[0].id; // Adjust the index if needed
+    const isProductInWishlist = wishlistState.productRow.some(item => item.product_id === productIdToCheck);
+    if (isProductInWishlist) {
+        console.log('Product not in the wishlist');
+       
+           setLiked(true);
+           
+    }
+    else{
+        setLiked(false)
+    }
+    console.log("checker chla")
+}, [data.products, wishlistState.productRow]);
+
+    
+
+    const toggleLiked = () => {
+        setLiked(true);
+    };
+
+    const [previewImage, setPreviewImage] = useState(
+        data.products[0].image_url
+    );
+    const notify = () =>
+        toast.success("😍 Product added to your cart!", {
+            position: "top-left",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
         });
+
+        const notify2 = () =>
+            toast.success("❤️ Product added to Wish list!", {
+                position: "top-left",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
 
     const handleAddToCart = async (email: string, productId: string) => {
         console.log(email);
@@ -93,25 +152,53 @@ export default function SearchProductsById() {
                 body: JSON.stringify({ email, product_id: productId }),
             });
 
-            dispatch({ 
-                type: "ADD_PRODUCT", 
-                product: { 
+            dispatch({
+                type: "ADD_PRODUCT",
+                product: {
                     product_id: data.products[0].id,
                     name: data.products[0].name,
                     image_url: data.products[0].image_url,
                     price: data.products[0].price,
-                    no_of_product: 1 
-                } 
+                    no_of_product: 1,
+                },
             });
-             // Dispatching an action to add the product to the cart with initial quantity 1
-             notify();
+            // Dispatching an action to add the product to the cart with initial quantity 1
+            notify();
             // window.location.reload();
         } catch (error) {
             console.error("Failed to increase product:", error);
         }
     };
 
-  
+    const handleAddToWishList = async (email: string, productId: string) => {
+        console.log(email);
+        console.log(productId);
+        try {
+            // await fetch("/addProduct", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({ email, product_id: productId }),
+            // });
+
+            dispatch2({
+                type: "ADD_PRODUCT",
+                product: {
+                    product_id: data.products[0].id,
+                    name: data.products[0].name,
+                    image_url: data.products[0].image_url,
+                    price: data.products[0].price,
+                },
+            });
+            // Dispatching an action to add the product to the cart with initial quantity 1
+            notify2();
+            // window.location.reload();
+        } catch (error) {
+            console.error("Failed to increase product:", error);
+        }
+    };
+    
 
     return (
         <div className="bg-white min-h-screen">
@@ -124,42 +211,77 @@ export default function SearchProductsById() {
                     />
                 </Link>
                 <Cart />
+                <WishList />
             </header>
 
             <main className="container mx-auto py-4 flex justify-center ">
                 <div className="bg-white rounded-lg  p-4 flex items-center m-8 gap-8">
                     <div className="flex flex-col gap-4">
                         <div>
+                            <div className="relative top-16  ">
+                                <button
+                                    onClick={() =>
+                                        handleAddToWishList(
+                                            data.userEmail,
+                                            data.products[0].id
+                                        )
+                                    }
+                                >
+                                    <div className="heart-bg">
+                                        <div
+                                            className={`heart-icon ${
+                                                liked ? "liked" : ""
+                                            }`}
+                                            onClick={toggleLiked}
+                                        ></div>
+                                    </div>
+                                </button>
+                            </div>
                             <img
                                 src={previewImage}
                                 alt={data.products[0].name}
                                 className="mx-auto mb-2 h-96 w-96 rounded-xl"
                             />
                         </div>
+
                         <div className="flex justify-between">
                             <img
                                 src={data.products[0].image_url}
                                 alt={data.products[0].name}
                                 className=" mb-2 h-20 w-20 rounded-xl cursor-pointer"
-								onClick={()=>{setPreviewImage(data.products[0].image_url)}}
+                                onClick={() => {
+                                    setPreviewImage(data.products[0].image_url);
+                                }}
                             />
                             <img
                                 src={data.products[0].image_url2}
                                 alt={data.products[0].name}
                                 className=" mb-2 h-20 w-20 rounded-xl cursor-pointer"
-								onClick={()=>{setPreviewImage(data.products[0].image_url2)}}
+                                onClick={() => {
+                                    setPreviewImage(
+                                        data.products[0].image_url2
+                                    );
+                                }}
                             />
                             <img
                                 src={data.products[0].image_url3}
                                 alt={data.products[0].name}
                                 className=" mb-2 h-20 w-20 rounded-xl cursor-pointer"
-								onClick={()=>{setPreviewImage(data.products[0].image_url3)}}
+                                onClick={() => {
+                                    setPreviewImage(
+                                        data.products[0].image_url3
+                                    );
+                                }}
                             />
                             <img
                                 src={data.products[0].image_url4}
                                 alt={data.products[0].name}
                                 className=" mb-2 h-20 w-20 rounded-xl cursor-pointer"
-								onClick={()=>{setPreviewImage(data.products[0].image_url4)}}
+                                onClick={() => {
+                                    setPreviewImage(
+                                        data.products[0].image_url4
+                                    );
+                                }}
                             />
                         </div>
                     </div>
@@ -186,9 +308,17 @@ export default function SearchProductsById() {
                                     ₹ {data.products[0].original_price}
                                 </h2>
                             </div>
-                            <div className="py-2"><div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold"> 
-							{Math.floor(100*((data.products[0].original_price - data.products[0].price)/data.products[0].original_price))}
-							% off</div></div>
+                            <div className="py-2">
+                                <div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold">
+                                    {Math.floor(
+                                        100 *
+                                            ((data.products[0].original_price -
+                                                data.products[0].price) /
+                                                data.products[0].original_price)
+                                    )}
+                                    % off
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <button
@@ -199,11 +329,11 @@ export default function SearchProductsById() {
                                     )
                                 }
                                 className="bg-orange-500  p-1 px-12 rounded text-white flex items-center gap-2"
-                            >  
-								<img src={cart} alt="" className="h-6 w-6" />
-                                 Add to cart
+                            >
+                                <img src={cart} alt="" className="h-6 w-6" />
+                                Add to cart
                             </button>
-                            <ToastContainer/>
+                            <ToastContainer />
                         </div>
                     </div>
                 </div>
