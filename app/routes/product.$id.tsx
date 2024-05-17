@@ -23,19 +23,28 @@ type Product = {
     imageUrl: string;
 };
 
+type ProductVariants = {
+    variant_id: number;
+    product_id: number;
+    size: string;
+    dimensions: string;
+    thickness: string;
+    original_price: number;
+    selling_prive: number;
+};
+
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
         const accessToken = await getAccessTokenFromCookies(request);
-
         if (accessToken == null) {
             return redirect("/sign-in");
         } else {
             console.log("accessToken hai for product by id page");
         }
-
         if (!accessToken.email.endsWith("@growthjockey.com")) {
             throw new Error("Unauthorized access");
         }
+
         const productId = params.id;
         // Fetch categories from the database
         const postgresDatabaseManager = await getPostgresDatabaseManager(null);
@@ -56,27 +65,35 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         if (result instanceof Error) {
             throw new Error("Error querying database for products");
         }
-// ----------------------------------------------------------------------
-        const resultVariants = await postgresDatabaseManager.execute(
+        // ----------------------------------------------------------------------
+        const resultVariantsDimensions = await postgresDatabaseManager.execute(
             `SELECT 
-             name,price,original_price,image_url,image_url2,image_url3,image_url4,description,id
-        FROM
-             products
+            size,
+            dimensions,
+            thickness,
+            selling_price,
+            original_price
+           
+            FROM
+            products_variants
         WHERE
-              id = $1`,
+            product_id = $1`,
             [productId]
         );
-        
-        if (resultVariants instanceof Error) {
-            throw new Error("Error querying database for products");
+
+        if (resultVariantsDimensions instanceof Error) {
+            throw new Error("Error querying database for productsVariants");
         }
-// ----------------------------------------------------------------
+        // ----------------------------------------------------------------
+
         const userEmail = accessToken.email;
-
+        const productsVariants: ProductVariants[] =
+            resultVariantsDimensions.rows;
         const products: Product[] = result.rows;
-        console.log("this is the product" + JSON.stringify(products));
+        // console.log("this is the product" + JSON.stringify(products));
+        console.log(JSON.stringify(productsVariants));
 
-        return json({ products, userEmail });
+        return json({ products, userEmail, productsVariants });
     } catch (error) {
         console.error(error);
         return json({ error: "Failed to load products" }, 500);
@@ -90,22 +107,20 @@ export default function SearchProductsById() {
     const { state: wishlistState } = useWishList();
     const [liked, setLiked] = useState(false);
 
- useEffect(() => {
-    const productIdToCheck = data.products[0].id; // Adjust the index if needed
-    const isProductInWishlist = wishlistState.productRow.some(item => item.product_id === productIdToCheck);
-    if (isProductInWishlist) {
-        console.log('Product not in the wishlist');
-       
-           setLiked(true);
-           
-    }
-    else{
-        setLiked(false)
-    }
-    console.log("checker chla")
-}, [data.products, wishlistState.productRow]);
+    useEffect(() => {
+        const productIdToCheck = data.products[0].id; // Adjust the index if needed
+        const isProductInWishlist = wishlistState.productRow.some(
+            (item) => item.product_id === productIdToCheck
+        );
+        if (isProductInWishlist) {
+            console.log("Product not in the wishlist");
 
-    
+            setLiked(true);
+        } else {
+            setLiked(false);
+        }
+        console.log("checker chla");
+    }, [data.products, wishlistState.productRow]);
 
     const toggleLiked = () => {
         setLiked(true);
@@ -127,18 +142,18 @@ export default function SearchProductsById() {
             transition: Bounce,
         });
 
-        const notify2 = () =>
-            toast.success("❤️ Product added to Wish list!", {
-                position: "top-left",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Bounce,
-            });
+    const notify2 = () =>
+        toast.success("❤️ Product added to Wish list!", {
+            position: "top-left",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+        });
 
     const handleAddToCart = async (email: string, productId: string) => {
         console.log(email);
@@ -198,7 +213,86 @@ export default function SearchProductsById() {
             console.error("Failed to increase product:", error);
         }
     };
+
+    const uniqueSize = [
+        ...new Set(data.productsVariants.map((product) => product.size)),
+    ];
+
+    const [currentSize, setCurrentSize] = useState(uniqueSize[0]);
+
+    // const uniqueDimensions = [
+    //     ...new Set(
+    //         data.productsVariants
+    //             .filter((product) => product.size === currentSize) // Filter products by current size
+    //             .map((product) => product.dimensions)
+    //     ),
+    // ];
+
+    // const [currentDimension, setCurrentDimension] = useState(
+    //     uniqueDimensions[0]
+    // );
+    const [uniqueDimensions,setUniqueDimensions]=useState([]);
+
+    useEffect(() => {
+        const filteredDimensions = [
+            ...new Set(
+                data.productsVariants
+                    .filter((product) => product.size === currentSize)
+                    .map((product) => product.dimensions)
+            )
+        ];
+        setUniqueDimensions(filteredDimensions);
+    }, [currentSize]);
+
+    const [currentDimension,setCurrentDimension]=useState(uniqueDimensions[0]);
+    useEffect(()=>{
+        setCurrentDimension(uniqueDimensions[0]);
+    },[uniqueDimensions]);
+
+    console.log(currentDimension)
+    // --------------------------------------------------------------
+    const [uniqueThickness, setUniqueThickness] = useState(
+       []
+    );
+
+    useEffect(()=>{
+      const filteredThickness=[
+        ...new Set(
+            data.productsVariants
+            .filter((product)=>product.dimensions === currentDimension)
+            .map((product)=>product.thickness)
+        )
+      ];
+      setUniqueThickness(filteredThickness);
+    },[currentDimension])
+
+    const[currentThickeness,setCurrentThickness]=useState(uniqueThickness[0]);
+    useEffect(()=>{
+        setCurrentThickness(uniqueThickness[0]);
+    },[currentDimension]);
     
+    
+
+    const handleDimensionClick = (dimension: string) => {
+        setCurrentDimension(dimension);
+    };
+    const handleSizeClick = (size: string) => {
+        setCurrentSize(size);
+    };
+    const handleThicknessClick = (thickness: string) => {
+        setCurrentThickness(thickness);
+    };
+
+
+    const selectedProduct = data.productsVariants.find(
+        (product) =>
+            product.dimensions == currentDimension &&
+            product.size == currentSize &&
+            product.thickness == currentThickeness
+    );
+
+    const currentPrice = selectedProduct ? selectedProduct.selling_price : 0;
+    const originalPrice = selectedProduct ? selectedProduct.original_price : 0;
 
     return (
         <div className="bg-white min-h-screen">
@@ -213,7 +307,6 @@ export default function SearchProductsById() {
                 <Cart />
                 <WishList />
             </header>
-
             <main className="container mx-auto py-4 flex justify-center ">
                 <div className="bg-white rounded-lg  p-4 flex items-center m-8 gap-8">
                     <div className="flex flex-col gap-4">
@@ -298,23 +391,84 @@ export default function SearchProductsById() {
                         <p className="text-sm text-gray-600 mb-2 w-96">
                             {data.products[0].description}
                         </p>
+                        <div className="size">
+                            Size
+                            <div className="grid grid-cols-4 gap-2 py-2">
+                                {uniqueSize.map((size, index) => (
+                                    <div
+                                        key={index}
+                                        className={`border border-black rounded-tr-lg rounded-bl-lg p-1 text-center cursor-pointer text-black ${
+                                            currentSize === size
+                                                ? "bg-orange-500"
+                                                : ""
+                                        }`}
+                                        onClick={() => {
+                                            handleSizeClick(size);
+                                        }}
+                                    >
+                                        {size}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="dimensions  ">
+                            Dimensions
+                            <div className="grid grid-cols-4 gap-2 py-2">
+                                {uniqueDimensions.map((dimension, index) => (
+                                    <div
+                                        key={index}
+                                        className={`border border-black rounded-tr-lg rounded-bl-lg p-1 text-center cursor-pointer  text-black ${
+                                            currentDimension === dimension
+                                                ? "bg-orange-500"
+                                                : ""
+                                        }`}
+                                        onClick={() => {
+                                            handleDimensionClick(dimension);
+                                        }}
+                                    >
+                                        {dimension}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="size  ">
+                            Thickness
+                            <div className="grid grid-cols-4 gap-2 py-2">
+                                {uniqueThickness.map((thickness, index) => (
+                                    <div
+                                        key={index}
+                                        className={`border border-black rounded-tr-lg rounded-bl-lg p-1 text-center cursor-pointer  text-black ${
+                                            currentThickeness === thickness
+                                                ? "bg-orange-500"
+                                                : ""
+                                        }`}
+                                        onClick={() => {
+                                            handleThicknessClick(thickness);
+                                        }}
+                                    >
+                                        {thickness}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="flex gap-4">
                             <div>
                                 {" "}
                                 <h2 className="text-[28px]  text-black font-bold">
-                                    ₹ {data.products[0].price}
+                                    ₹ {currentPrice}
                                 </h2>
                                 <h2 className="text-xl font-semibold line-through">
-                                    ₹ {data.products[0].original_price}
+                                    ₹ {originalPrice}
                                 </h2>
                             </div>
                             <div className="py-2">
                                 <div className="bg-orange-200 rounded-md p-1 px-2 text-red-600 font-semibold">
                                     {Math.floor(
                                         100 *
-                                            ((data.products[0].original_price -
-                                                data.products[0].price) /
-                                                data.products[0].original_price)
+                                            ((originalPrice - currentPrice) /
+                                                originalPrice)
                                     )}
                                     % off
                                 </div>
