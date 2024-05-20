@@ -46,7 +46,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         }
 
         const productId = params.id;
-        // Fetch categories from the database
+        // Fetch product from the database
         const postgresDatabaseManager = await getPostgresDatabaseManager(null);
         if (postgresDatabaseManager instanceof Error) {
             throw new Error("Error connecting to database");
@@ -68,6 +68,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         // ----------------------------------------------------------------------
         const resultVariantsDimensions = await postgresDatabaseManager.execute(
             `SELECT 
+            variant_id,
             size,
             dimensions,
             thickness,
@@ -173,7 +174,7 @@ export default function SearchProductsById() {
                     product_id: data.products[0].id,
                     name: data.products[0].name,
                     image_url: data.products[0].image_url,
-                    price: data.products[0].price,
+                    price: currentPrice,
                     no_of_product: 1,
                 },
             });
@@ -219,7 +220,6 @@ export default function SearchProductsById() {
     ];
 
     const [currentSize, setCurrentSize] = useState(uniqueSize[0]);
-
     // const uniqueDimensions = [
     //     ...new Set(
     //         data.productsVariants
@@ -266,10 +266,10 @@ export default function SearchProductsById() {
       setUniqueThickness(filteredThickness);
     },[currentDimension])
 
-    const[currentThickeness,setCurrentThickness]=useState(uniqueThickness[0]);
+    const[currentThickness,setCurrentThickness]=useState(uniqueThickness[0]);
     useEffect(()=>{
         setCurrentThickness(uniqueThickness[0]);
-    },[currentDimension]);
+    },[uniqueThickness]);
     
     
 
@@ -288,7 +288,7 @@ export default function SearchProductsById() {
         (product) =>
             product.dimensions == currentDimension &&
             product.size == currentSize &&
-            product.thickness == currentThickeness
+            product.thickness == currentThickness
     );
 
     const currentPrice = selectedProduct ? selectedProduct.selling_price : 0;
@@ -433,13 +433,13 @@ export default function SearchProductsById() {
                         </div>
 
                         <div className="size  ">
-                            Thickness
+                            Thickness {currentThickness}
                             <div className="grid grid-cols-4 gap-2 py-2">
                                 {uniqueThickness.map((thickness, index) => (
                                     <div
                                         key={index}
                                         className={`border border-black rounded-tr-lg rounded-bl-lg p-1 text-center cursor-pointer  text-black ${
-                                            currentThickeness === thickness
+                                            currentThickness === thickness
                                                 ? "bg-orange-500"
                                                 : ""
                                         }`}
